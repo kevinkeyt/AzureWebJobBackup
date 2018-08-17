@@ -1,20 +1,23 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.IO;
 using Microsoft.Azure.WebJobs;
 
 namespace BlogBackup
 {
     public class Functions
     {
-        // This function will get triggered/executed when a new message is written 
-        // on an Azure Queue called queue.
-        public static void ProcessQueueMessage([QueueTrigger("queue")] string message, TextWriter log)
+
+        public static void CheckForFileUpdates([FileTrigger(@"wwwroot\data\posts\{name}", "*.json", WatcherChangeTypes.Created | WatcherChangeTypes.Changed, autoDelete: false)] TextReader file, 
+            [Blob(@"postbackup/{name}")] TextWriter output, string name, TextWriter log)
         {
-            log.WriteLine(message);
+            output.Write(file.ReadToEnd());
+            log.WriteLine($"Processed input file {name}");
+        }
+
+        public static void BlogDataBackup([FileTrigger(@"wwwroot\data\{name}", "*.json", WatcherChangeTypes.Created | WatcherChangeTypes.Changed, autoDelete: false)] TextReader file,
+            [Blob(@"blogbackup/{name}")] TextWriter output, string name, TextWriter log)
+        {
+            output.Write(file.ReadToEnd());
+            log.WriteLine($"Processed input file {name}");
         }
     }
 }

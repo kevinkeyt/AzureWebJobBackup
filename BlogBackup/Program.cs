@@ -1,9 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.Azure.WebJobs;
+﻿using Microsoft.Azure.WebJobs;
+using Microsoft.Azure.WebJobs.Extensions.Files;
+using System;
+using System.IO;
 
 namespace BlogBackup
 {
@@ -15,6 +13,13 @@ namespace BlogBackup
         static void Main()
         {
             var config = new JobHostConfiguration();
+            FilesConfiguration filesConfiguration = new FilesConfiguration();
+            string home = Environment.GetEnvironmentVariable("HOME");
+            if (!string.IsNullOrEmpty(home))
+            {
+                filesConfiguration.RootPath = Path.Combine(home, "site");
+            }
+            config.UseFiles(filesConfiguration);
 
             if (config.IsDevelopment)
             {
